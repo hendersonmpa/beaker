@@ -7,7 +7,9 @@
   :serial t
   :depends-on (#:cl-csv
                #:clsql
+               #:clsql-sqlite3
                #:cl-ppcre
-               #:cl-cwd)
+               #:cl-cwd
+               #:cl-fad)
   :components ((:file "package")
                (:file "beaker")))

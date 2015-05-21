@@ -6,96 +6,10 @@
 
 ;;; Data Management
 ;;(defparameter *test-file* "/home/mpah/lisp/site/porph-screen/data/FPORS 2014-09-04.csv")
-(defparameter *data-repository* "/Users/matthew/Documents/CHEO/LIS_data/")
+(defparameter *data-repository* "/Users/matthew/Documents/CHEO/LIS/extracts/")
 (defparameter *test-file*
   (merge-pathnames *data-repository*
                    "CHEO Lab Quality Indicators - Biochemistry_2015-04-01-05-50-55.csv"))
-
-;; (clsql:def-view-class entry ()
-;;   ((specimen-number
-;;     :initarg :specimen-number
-;;     :type string
-;;     :accessor specimen-number)
-;;    (mrn
-;;     :initarg :mrn
-;;     :type string
-;;     :accessor mrn)
-;;    (encounter
-;;     :initarg :encounter
-;;     :type string
-;;     :accessor encounter)
-;;    (location
-;;     :initarg :location
-;;     :type string
-;;     :accessor location)
-;;    (order-datetime
-;;     :initarg :order-datetime
-;;     :type string
-;;     :accessor order-datetime)
-;;    (collection-datetime
-;;     :initarg :collection-datetime
-;;     :type string
-;;     :accessor collection-datetime)
-;;    (received-datetime
-;;     :initarg :received-datetime
-;;     :type string
-;;     :accessor received-datetime)
-;;    (verified-datetime
-;;     :initarg :verified-datetime
-;;     :type string
-;;     :accessor verified-datetime)
-;;    (component
-;;     :initarg :component
-;;     :type string
-;;     :accessor component)
-;;    (result
-;;     :initarg :result
-;;     :type string
-;;     :accessor result)
-;;    (comment
-;;     :initarg :comment
-;;     :type string
-;;     :accessor comment)
-;;    (transit
-;;     :initarg :transit
-;;     :type float
-;;     :accessor transit)
-;;    (tat
-;;     :initarg :tat
-;;     :type float
-;;     :accessor tat)
-;;    (test
-;;     :initarg :test
-;;     :type string
-;;     :accessor test)
-;;    (age
-;;     :initarg :age
-;;     :type float
-;;     :accessor age)
-;;    (sex
-;;     :initarg :sex
-;;     :type string
-;;     :accessor sex)
-;;    (resulting-user
-;;     :initarg :user
-;;     :type string
-;;     :accessor user)
-;;    (provider
-;;     :initarg :provider
-;;     :type string
-;;     :accessor provider)
-;;    (address
-;;     :initarg :address
-;;     :type string
-;;     :accessor address)
-;;    (city
-;;     :initarg :city
-;;     :type string
-;;     :accessor city)
-;;    (postal
-;;     :initarg :postal
-;;     :type string
-;;     :accessor postal)))
 
 (clsql:def-view-class patient ()
   ((mrn
@@ -269,31 +183,6 @@
                   (/ number 12))
                  (t 0)))))
 
-;; (defun create-entry-object (row)
-;;   (make-instance 'entry
-;;                  :specimen-number (first row)
-;;                  :mrn (second row)
-;;                  :encounter (third row)
-;;                  :location (fourth row)
-;;                  :order-datetime (make-datetime (subseq row 4 6))
-;;                  :collection-datetime (make-datetime (subseq row 6 8))
-;;                  :received-datetime (make-datetime (subseq row 8 10))
-;;                  :resulted-datetime (make-datetime (subseq row 10 12))
-;;                  :verified-datetime (make-datetime (subseq row 12 14))
-;;                  :component (nth 14 row)
-;;                  :result (nth 15 row)
-;;                  :comment (nth 16 row)
-;;                  :transit (minutes-float (nth 17 row))
-;;                  :tat (minutes-float (nth 18 row))
-;;                  :test (nth 19 row)
-;;                  :age (age-string-num (nth 20 row))
-;;                  :sex (nth 21 row)
-;;                  :resulting-user (nth 22 row)
-;;                  :provider (nth 23 row)
-;;                  :address (nth 24 row)
-;;                  :city (nth 26 row)
-;;                  :postal (nth 27 row)))
-
 (defstruct tables patient physician biochemistry sample)
 
 (defun create-tables-struct (row)
@@ -336,8 +225,7 @@
                               :transit (minutes-float (nth 17 row))
                               :provider (nth 23 row)
                               :priority nil ;; need this data
-                              ))
-  )
+                              )))
 
 ;; Create tables from our view classes
 ;; Only the first time !!!!!
@@ -382,8 +270,8 @@
   (let ((tables-struct (create-tables-struct row)))
     (update-tables tables-struct)))
 
-(defun update-database ()
-  (cl-csv:read-csv *test-file*
+(defun update-database (file)
+  (cl-csv:read-csv file
                    :map-fn #'add-entry
                    :skip-first-p t
                    :unquoted-empty-string-is-nil t))
@@ -395,3 +283,10 @@
         (print "Database doesn't exist"))
     (create-schema)
     (update-database)))
+
+
+(defun add-dir-db (&optional (location *data-repository*))
+  (flet ((extract-file-p (pathname) (cl-ppcre:scan "CHEO Lab Quality Indicators" (namestring pathname))))
+    (cl-fad:walk-directory location #'print :test #'extract-file-p )
+                                        ;(remove-duplicate-rows)
+    ))

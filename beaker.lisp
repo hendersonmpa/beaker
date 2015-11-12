@@ -6,7 +6,9 @@
 
 ;;; Data Management
 ;;(defparameter *test-file* "/home/mpah/lisp/site/porph-screen/data/FPORS 2014-09-04.csv")
-(defparameter *data-repository* "/Users/matthew/Documents/CHEO/LIS/extracts/")
+(defparameter *data-repository* "/Users/matthew/Documents/CHEO/LIS/extracts/processed/")
+(defparameter *db-file* (pathname "/Users/matthew/Documents/CHEO/LIS/beaker.sqlite"))
+
 (defparameter *test-file*
   (merge-pathnames *data-repository*
                    "CHEO Lab Quality Indicators - Biochemistry_2015-04-01-05-50-55.csv"))
@@ -53,10 +55,10 @@
     :accessor specialty)))
 
 (clsql:def-view-class biochemistry ()
-  ((verified-datetime
-    :initarg :verified-datetime
+  ((test
+    :initarg :test
     :type string
-    :accessor verified-datetime)
+    :accessor test)
    (component
     :initarg :component
     :type string
@@ -65,6 +67,14 @@
     :initarg :result
     :type string
     :accessor result)
+   (specimen-number
+    :initarg :specimen-number
+    :type string
+    :accessor specimen-number)
+   (verified-datetime
+    :initarg :verified-datetime
+    :type string
+    :accessor verified-datetime)
    (comment
     :initarg :comment
     :type string
@@ -73,10 +83,6 @@
     :initarg :tat
     :type float
     :accessor tat)
-   (test
-    :initarg :test
-    :type string
-    :accessor test)
    (age
     :initarg :age
     :type float
@@ -148,20 +154,26 @@
 
 ;; ("Specimen Number" "MRN" "Encounter ID" "Order Location" "Order Date"
 ;;  "Order Time" "Collection Date" "Collection Time" "Received Date"
+
 ;;  "Received Time" "Resulted Date" "Resulted Time" "Verified Date"
 ;;  "Verified Time" "Component" "Result" "Component Comm" "Transit TAT(Minutes)"
 ;;  "TAT(Minutes)" "Test Name" "Age" "Sex" "Resulting User" "Authorizing Provider"
 ;;  "Patient Address 1" "Patient Address 1" "City" "Postal")
 
 (defun make-datetime (datetime-list)
-  "TODO make and ISO date-time format"
+  "Convert ?m-?d-YYYY and ?h:?m:ss to ISO date-time format YYYY-MM-DD HH:MM:SS.SSS."
   (flet ((iso-date (date)
            (ppcre:register-groups-bind
-               (month day year)
+               ((#'parse-integer month) (#'parse-integer day) (#'parse-integer year))
                ("(\\d{1,2})/(\\d{1,2})/(\\d{4})" date)
-             (concatenate 'string year "-" month "-" day))))
+             (format nil "~4,'0d-~2,'0d-~2,'0d" year month day)))
+         (iso-time (time)
+           (ppcre:register-groups-bind
+               ((#'parse-integer hours) (#'parse-integer minutes) (#'parse-integer seconds))
+               ("(\\d{1,2}):(\\d{1,2}):(\\d{2})" time)
+             (format nil "~2,'0d:~2,'0d:~2,'0d.000" hours minutes seconds))))
     (let ((date (iso-date (first datetime-list)))
-          (time (second datetime-list)))
+          (time (iso-time (second datetime-list))))
       (concatenate 'string date " " time))))
 
 (defun minutes-float (time-string)
@@ -201,12 +213,13 @@
                               :specialty (fourth row)) ;; this is currently the location
                :biochemistry
                (make-instance 'biochemistry
-                              :verified-datetime (make-datetime (subseq row 12 14))
+                              :test (nth 19 row)
                               :component (nth 14 row)
                               :result (nth 15 row)
+                              :specimen-number (first row)
+                              :verified-datetime (make-datetime (subseq row 12 14))
                               :comment (nth 16 row)
                               :tat (minutes-float (nth 18 row))
-                              :test (nth 19 row)
                               :age (age-string-num (nth 20 row))
                               :upper-ri nil
                               :lower-ri nil
@@ -229,42 +242,34 @@
 
 ;; Create tables from our view classes
 ;; Only the first time !!!!!
-(defun create-schema (&optional (location *data-repository*)
-                        (name "beaker.sqlite"))
-  (let ((db-connection (list (concatenate 'string location name))))
-    (if (probe-file (merge-pathnames location name)) ;; only useful for sqlite
-        (print "Database file exists")
-        (clsql:with-database (db db-connection
-                                 :database-type :sqlite3)
-          (clsql:create-view-from-class 'patient :database db)
-          (clsql:create-view-from-class 'physician :database db)
-          (clsql:create-view-from-class 'biochemistry :database db)
-          (clsql:create-view-from-class 'sample :database db)))))
+(defun create-schema (&optional(db-connection *db-file*))
+  (if (probe-file db-connection) ;; only useful for sqlite
+      (print "Database file exists")
+      (clsql:with-database (db (list db-connection)
+                               :database-type :sqlite3)
+        (clsql:create-view-from-class 'patient :database db)
+        (clsql:create-view-from-class 'physician :database db)
+        (clsql:create-view-from-class 'biochemistry :database db)
+        (clsql:create-view-from-class 'sample :database db))))
 
-(defun update-tables (tables-struct &optional (location *data-repository*)
-                                      (name "beaker.sqlite"))
+(defun update-tables (tables-struct &optional (db-connection *db-file*))
   "Update database with entries"
-  (let ((db-connection (list (concatenate 'string location name))))
-    (clsql:with-database (db db-connection
-                             :database-type :sqlite3)
-      (clsql:update-records-from-instance (tables-patient tables-struct) :database db)
-      (clsql:update-records-from-instance (tables-physician tables-struct) :database db)
-      (clsql:update-records-from-instance (tables-biochemistry tables-struct) :database db)
-      (clsql:update-records-from-instance (tables-sample tables-struct) :database db)
-      )))
+  (clsql:with-database (db (list db-connection)
+                           :database-type :sqlite3)
+    (clsql:update-records-from-instance (tables-patient tables-struct) :database db)
+    (clsql:update-records-from-instance (tables-physician tables-struct) :database db)
+    (clsql:update-records-from-instance (tables-biochemistry tables-struct) :database db)
+    (clsql:update-records-from-instance (tables-sample tables-struct) :database db)))
 
-
-(defun remove-duplicate-rows (&optional (location *data-repository*)
-                          (name "beaker.sqlite"))
-  (let ((db-connection (list (concatenate 'string location name))))
-    (clsql:with-database (db db-connection
-                             :database-type :sqlite3)
-      (clsql:execute-command "delete from physician where rowid not in (select max(rowid) from physician group by provider);"
-                             :database db )
-      (clsql:execute-command "delete from patient where rowid not in (select max(rowid) from patient group by mrn);"
-                             :database db )
-      (clsql:execute-command "delete from sample where rowid not in (select max(rowid) from sample group by specimen_number);"
-                             :database db ))))
+(defun remove-duplicate-rows (&optional (db-connection *db-file*))
+  (clsql:with-database (db (list db-connection)
+                           :database-type :sqlite3)
+    (clsql:execute-command "delete from physician where rowid not in (select max(rowid) from physician group by provider);"
+                           :database db )
+    (clsql:execute-command "delete from patient where rowid not in (select max(rowid) from patient group by mrn);"
+                           :database db )
+    (clsql:execute-command "delete from sample where rowid not in (select max(rowid) from sample group by specimen_number);"
+                           :database db )))
 
 (defun add-entry (row)
   (let ((tables-struct (create-tables-struct row)))
@@ -284,9 +289,8 @@
     (create-schema)
     (update-database)))
 
-
 (defun add-dir-db (&optional (location *data-repository*))
   (flet ((extract-file-p (pathname) (cl-ppcre:scan "CHEO Lab Quality Indicators" (namestring pathname))))
-    (cl-fad:walk-directory location #'print :test #'extract-file-p )
-                                        ;(remove-duplicate-rows)
-    ))
+    (create-schema)
+    (cl-fad:walk-directory location #'update-database :test #'extract-file-p )
+                                        (remove-duplicate-rows)))o

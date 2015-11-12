@@ -7,9 +7,11 @@
   :serial t
   :depends-on (#:cl-csv
                #:clsql
-               #:clsql-sqlite3
+               #:clsql-mysql
                #:cl-ppcre
-               #:cl-cwd
-               #:cl-fad)
+               #:cl-fad) ;; TODO: change to UIOP
   :components ((:file "package")
-               (:file "beaker")))
+               (:file "view-classes")
+               (:file "utilities")
+               (:file "instances")
+               (:file "db")))

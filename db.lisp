@@ -1,11 +1,6 @@
 ;;; db.lisp
 ;;; Interaction with the database
 
-;; (defgeneric update-table (object)
-;;   (:documentation "add row to appropriate table"))
-
-;; (defmethod update-table ((provider-row provider)))
-
 (defun update-tables (object)
   "Update database with entries"
   (handler-case ; error when repeat entries are attempted

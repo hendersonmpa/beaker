@@ -2,6 +2,11 @@
 
 (in-package #:beaker)
 
+(defparameter *provider-file*
+  (merge-pathnames *data-repository* "DH_Physician_Extract.csv"))
+(defparameter *patient-file*
+  (merge-pathnames *data-repository* "DH_Patient_Extract.csv"))
+
 ;;; Read in the csv files
 (defun create-row-vector (file)
   "Read the csv into a list of vectors"
@@ -18,12 +23,22 @@
   (time (dotimes (i iterations)
           (funcall function file))))
 
-;;(test 250 #'create-row-vector *test-file*)
+;;; Provider instance closure
+(let ((ht (create-index-hash *provider-file*)))
+  (defun make-provider (row)
+    (flet ((entry (key row)  ;ht closure
+             (svref row (gethash key ht))))
+      (make-instance 'provider
+                     :name (entry 'prov_name row)
+                     :id (parse-integer (entry 'prov_id row))
+                     :line (parse-integer (entry 'line row))
+                     :speciality (entry 'prov_specialty row)))))
 
-(defun make-provider (row)
-  (declare (inline entry))
-  (make-instance 'provider
-                 :name (entry 'prov_name row)
-                 :id (parse-integer (entry 'prov_id row))
-                 :line (parse-integer (entry 'line row))
-                 :speciality (entry 'prov_specialty row)))
+(let ((ht (create-index-hash *patient-file*)))
+  (defun make-patient (row)
+    (flet ((entry (key row)  ;ht closure
+             (svref row (gethash key ht))))
+      (make-instance 'patient
+                     :mrn (parse-integer (entry 'pat_mrn_id row))
+                     :dob (entry 'pat_dob row)
+                     :sex (entry 'pat_sex row)))))

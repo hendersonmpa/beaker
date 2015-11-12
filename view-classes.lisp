@@ -3,17 +3,16 @@
 (in-package #:beaker)
 
 (clsql:def-view-class patient ()
-  ((idpatient :db-kind :key :db-constraints :not-null :initarg :idpatient
-    :type int :accessor idpatient)
-   (mrn :initarg :mrn :type '(string 45) :accessor mrn)
-   (dob :initarg :dob :nulls-ok t :type string :accessor dob)
-   (sex :initarg :sex :type (string 45) :accessor sex)))
+  ((mrn :db-kind :key :db-constraints :not-null :initarg :mrn
+        :type integer :accessor mrn)
+   (dob :initarg :dob :nulls-ok t :type (string 20) :accessor dob)
+   (sex :initarg :sex :type (string 10) :accessor sex))
+  (:base-table |patient|))
 
 (clsql:def-view-class provider ()
   ((id :db-kind :key :db-constraints :not-null :initarg :id
        :type integer :accessor name)
    (name :initarg :name :type (string 45) :accessor name)
-
    (line :initarg :line :type integer :accessor line)
    ;; use location as a surrogate for specialty
    (specialty :initarg :specialty :type (string 45) :accessor specialty))

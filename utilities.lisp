@@ -33,12 +33,6 @@
 (defparameter *column-name-hash* (create-index-hash *test-file*)
   "A hashtable with column names as keys and the index as values")
 
-;;; TODO: Remove global variables in entry, try a closure or macro
-;;; to create local state for the hash-table
-(defun entry (key row-vector &key (ht *column-name-hash*))
-  (let ((index (gethash key ht)))
-    (svref row-vector index)))
-
 (defun list-to-array (list)
   (make-array (length list)
               :initial-contents list))

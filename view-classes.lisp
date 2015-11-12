@@ -5,7 +5,7 @@
 (clsql:def-view-class patient ()
   ((mrn :db-kind :key :db-constraints :not-null :initarg :mrn
         :type integer :accessor mrn)
-   (dob :initarg :dob :nulls-ok t :type (string 20) :accessor dob)
+   (dob :initarg :dob :type (string 20) :accessor dob)
    (sex :initarg :sex :type (string 10) :accessor sex))
   (:base-table |patient|))
 
@@ -13,9 +13,9 @@
   ((id :db-kind :key :db-constraints :not-null :initarg :id
        :type integer :accessor name)
    (name :initarg :name :type (string 45) :accessor name)
-   (line :initarg :line :type integer :accessor line)
+   (line :initarg :line :type (integer null) :accessor line)
    ;; use location as a surrogate for specialty
-   (specialty :initarg :specialty :type (string 45) :accessor specialty))
+   (specialty :initarg :specialty :type (string null) :accessor specialty))
   (:base-table |provider|))
 
 (clsql:def-view-class result ()

@@ -24,21 +24,42 @@
           (funcall function file))))
 
 ;;; Provider instance closure
-(let ((ht (create-index-hash *provider-file*)))
-  (defun make-provider (row)
-    (flet ((entry (key row)  ;ht closure
-             (svref row (gethash key ht))))
-      (make-instance 'provider
-                     :name (entry 'prov_name row)
-                     :id (parse-integer (entry 'prov_id row))
-                     :line (parse-integer (entry 'line row))
-                     :speciality (entry 'prov_specialty row)))))
+;; (let ((ht (create-index-hash *provider-file*)))
+;;   (defun make-provider (row)
+;;     (flet ((entry (key row)  ;ht closure
+;;              (svref row (gethash key ht))))
+;;       (make-instance 'provider
+;;                      :name (entry 'prov_name row)
+;;                      :id (parse-integer (entry 'prov_id row))
+;;                      :line (parse-integer (entry 'line row))
+;;                      :speciality (entry 'prov_specialty row)))))
 
-(let ((ht (create-index-hash *patient-file*)))
-  (defun make-patient (row)
-    (flet ((entry (key row)  ;ht closure
-             (svref row (gethash key ht))))
-      (make-instance 'patient
-                     :mrn (parse-integer (entry 'pat_mrn_id row))
-                     :dob (entry 'pat_dob row)
-                     :sex (entry 'pat_sex row)))))
+;; (let ((ht (create-index-hash *patient-file*)))
+;;   (defun make-patient (row)
+;;     (flet ((entry (key row)  ;ht closure
+;;              (svref row (gethash key ht))))
+;;       (make-instance 'patient
+;;                      :mrn (parse-integer (entry 'pat_mrn_id row))
+;;                      :dob (entry 'pat_dob row)
+;;                      :sex (entry 'pat_sex row)))))
+
+(defmacro definstance (name class ht &body body)
+  "Return functions to make instances using the hash-table"
+  (let ((gen-row (gensym "ROW"))
+        (gen-key (gensym "KEY")))
+    `(defun ,name (row)
+       (flet ((entry (,gen-key ,gen-row)  ;ht closure
+                (svref ,gen-row (gethash ,gen-key ,ht))))
+         (make-instance ,class
+                        ,@body)))))
+
+(definstance make-provider 'provider (create-index-hash *provider-file*)
+  :name (entry 'prov_name row)
+  :id (parse-integer (entry 'prov_id row))
+  :line (parse-integer (entry 'line row))
+  :speciality (entry 'prov_specialty row))
+
+(definstance make-patient 'patient (create-index-hash *patient-file*)
+  :mrn (parse-integer (entry 'pat_mrn_id row))
+  :dob (entry 'pat_dob row)
+  :sex (entry 'pat_sex row))

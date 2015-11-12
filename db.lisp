@@ -1,5 +1,5 @@
 ;;; db.lisp
-;;; Interaction with the database
+;;; Functions for interaction with the database.
 
 (defun update-tables (object)
   "Update database with entries"

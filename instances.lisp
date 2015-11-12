@@ -1,11 +1,20 @@
-;;;; make-instances.lisp
+;;; file instances.lisp
+;;; Functions and macros for creating instances from csv files.
 
 (in-package #:beaker)
 
+(defparameter *data-repository* "~/CHEO/LIS/data_mart/")
+(defparameter *test-file*
+  (merge-pathnames *data-repository*
+                   "DH_Physician_Extract.csv"))
 (defparameter *provider-file*
   (merge-pathnames *data-repository* "DH_Physician_Extract.csv"))
 (defparameter *patient-file*
   (merge-pathnames *data-repository* "DH_Patient_Extract.csv"))
+(defparameter *sample-file*
+  (merge-pathnames *data-repository* "DH_Samples_Extract.csv"))
+(defparameter *result-file*
+  (merge-pathnames *data-repository* "DH_Results_Extract.csv"))
 
 ;;; Read in the csv files
 (defun create-row-vector (file)

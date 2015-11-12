@@ -1,14 +1,8 @@
-;;;; objects.lisp
-
-
+;;; objects.lisp
+;;; Utilities for creating instances from csv rows
 
 (in-package #:beaker)
-(defparameter *data-repository* "~/CHEO/LIS/data_mart/")
-(defparameter *test-file*
-  (merge-pathnames *data-repository*
-                   "DH_Physician_Extract.csv"))
 
-;;; Utilities for creating instances from csv rows
 ;;; Build a hashtable with keys: column names and entries: column index.
 (defun create-index-hash (file)
   "Use the first row in the csv as the column-names.

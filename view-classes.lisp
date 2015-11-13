@@ -7,15 +7,15 @@
 (clsql:def-view-class patient ()
   ((mrn :db-kind :key :db-constraints :not-null :initarg :mrn
         :type integer :accessor mrn)
-   (dob :initarg :dob :type (string 20) :accessor dob)
-   (sex :initarg :sex :type (string 10) :accessor sex))
+   (dob :initarg :dob :type string :accessor dob)
+   (sex :initarg :sex :type string :accessor sex))
   (:base-table |patient|))
 
 ;;; Provider class
 (clsql:def-view-class provider ()
   ((id :db-kind :key :db-constraints :not-null :initarg :id
        :type integer :accessor name)
-   (name :initarg :name :type (string 45) :accessor name)
+   (name :initarg :name :type string :accessor name)
    (line :initarg :line :type integer :accessor line)
    ;; use location as a surrogate for specialty
    (specialty :initarg :specialty :type string :accessor specialty))
@@ -23,45 +23,45 @@
 
 ;;; Result super-class
 (clsql:def-view-class result ()
-  ((specimen_number :initarg :specimen-number :type (string 45)
-                    :accessor specimen_number)
-   (ordered_datetime :initarg :ordered-datetime :type datetime
+  ((specimen-number :initarg :specimen-number :type string
+                    :accessor specimen-number)
+   (ordered-datetime :initarg :ordered-datetime :type clsql:wall-time
                      :accessor ordered-datetime)
-   (verified_datetime :initarg :verified-datetime :type datetime
+   (verified-datetime :initarg :verified-datetime :type clsql:wall-time
                       :accessor verified-datetime)
-   (resulting-section-name :initarg :resulting-section-name :type (string 45)
+   (resulting-section-name :initarg :resulting-section-name :type string
                    :accessor resulting-section-name)
-   (resulting-section-id :initarg :resulting-section-id :type (string 45)
+   (resulting-section-id :initarg :resulting-section-id :type string
                        :accessor resulting-section-id)
-   (method-name :initarg :method-name :type (string 45) :accessor method-name)
-   (method-id :initarg :method-id :type (string 45) :accessor method-id)
-   (order-procedure-name :initarg :order-procedure-name :type (string 45)
+   (method-name :initarg :method-name :type string :accessor method-name)
+   (method-id :initarg :method-id :type string :accessor method-id)
+   (order-procedure-name :initarg :order-procedure-name :type string
                          :accessor order-procedure-name)
-   (order-procedure-code :initarg :order-procedure-code :type (string 45)
+   (order-procedure-code :initarg :order-procedure-code :type string
                          :accessor order-procedure-code)
-   (test-name :initarg :test-name :type (string 45) :accessor test-name)
-   (test-id :initarg :test-id :type (string 45) :accessor test-id)
-   (component-name :initarg :component-name :type (string 45)
+   (test-name :initarg :test-name :type string :accessor test-name)
+   (test-id :initarg :test-id :type string :accessor test-id)
+   (component-name :initarg :component-name :type string
                    :accessor component-name)
-   (component-id :initarg :component-id :type (string 45)
+   (component-id :initarg :component-id :type string
                  :accessor component-id)
-   (delta-yn :initarg :delta-yn :type (string 45) :accessor delta-yn)
-   (result :initarg :result :type (string 45) :accessor result)
-   (component-units :initarg :component-units :type (string 45)
+   (delta-yn :initarg :delta-yn :type string :accessor delta-yn)
+   (result :initarg :result :type string :accessor result)
+   (component-units :initarg :component-units :type string
                     :accessor component-units)
-   (component-normal-low :initarg :component-normal-low :type (string 45)
+   (component-normal-low :initarg :component-normal-low :type string
                          :accessor component-normal-low)
-   (component-normal-high :initarg :component-normal-high :type (string 45)
+   (component-normal-high :initarg :component-normal-high :type string
                           :accessor component-normal-high)
-   (component-comment :initarg :component-comment :type (string 45)
+   (component-comment :initarg :component-comment :type string
                       :accessor component-comment)
-   (test-internal-comment :initarg :test-internal-comment :type (string 45)
+   (test-internal-comment :initarg :test-internal-comment :type string
                           :accessor test-internal-comment)
-   (test-external-comment :initarg :test-external-comment :type (string 45)
+   (test-external-comment :initarg :test-external-comment :type string
                           :accessor test-external-comment)
-   (resulting-user :initarg :resulting-user :type (string 45)
+   (resulting-user :initarg :resulting-user :type string
                    :accessor resulting-user)
-   (verified-user :initarg :verified-user :type (string 45)
+   (verified-user :initarg :verified-user :type string
                   :accessor verified-user)
    (collected-to-verified :initarg :collect-to-verify :type string
                           :accessor collect-to-verify)
@@ -89,13 +89,14 @@
    (authorizing-provider-name :initarg :authorizing-provider-name :type string
                               :accessor authorizing-provider-name)
    (authorizing-provider-id :initarg :authorizing-provider-id :type string
-                            :accessor authorizing-provider-id)))
+                            :accessor authorizing-provider-id))
+  (:base-table |result|))
 
 ;;; Sample class
 (clsql:def-view-class sample ()
   ((accession
     :db-kind :key :db-constraints :not-null :initarg :accession
-    :type integer :accessor accession)
+    :type string :accessor accession)
    (location :initarg :location :type string :accessor location)
    (client :initarg :client :type string :accessor client)
    (ordered-procedure :initarg :ordered-procedure :type string
@@ -105,10 +106,10 @@
    (non-patient-name :initarg :non-patient-name :type string
                      :accessor non-patient-name)
    (original-order-datetime :initarg :original-ordered-datetime
-                            :type string :accessor ordered-procedure)
-   (collection-datetime :initarg :collection-datetime :type string
+                            :type clsql:wall-time :accessor ordered-procedure)
+   (collection-datetime :initarg :collection-datetime :type clsql:wall-time
                         :accessor collection-datetime)
-   (received_datetime :initarg :received_datetime :type string
+   (received_datetime :initarg :received_datetime :type clsql:wall-time
                       :accessor received_datetime)
    (priority :initarg :priority :type string :accessor priority)
    (specimen-drawn-by :initarg :specimen-drawn-by :type string
@@ -116,4 +117,5 @@
    (specimen-type :initarg :specimen-type :type string
                   :accessor specimen-type)
    (encounter-type :initarg :encounter :type string
-                   :accessor encounter-type)))
+                   :accessor encounter-type))
+  (:base-table |sample|))

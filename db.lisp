@@ -1,6 +1,19 @@
 ;;; db.lisp
 ;;; Functions for interaction with the database.
 
+;; Create tables from our view classes
+;; Only the first time !!!!!
+(defun create-schema ()
+  (let ((db-connection '("localhost" "lab" "root" "smjh13oo")))
+    (clsql:destroy-database db-connection :database-type :mysql)
+    (clsql:create-database db-connection :database-type :mysql)
+    (clsql:with-database (db db-connection :database-type :mysql)
+      (clsql:execute-command "SET CHARACTER SET utf8" :database db)
+      (clsql:create-view-from-class 'patient :database db)
+      (clsql:create-view-from-class 'provider :database db)
+      (clsql:create-view-from-class 'result :database db)
+      (clsql:create-view-from-class 'sample :database db))))
+
 (defun update-tables (object)
   "Update database with entries"
   (handler-case ; error when repeat entries are attempted

@@ -4,9 +4,6 @@
 (in-package #:beaker)
 
 (defparameter *data-repository* "~/CHEO/LIS/data_mart/")
-(defparameter *test-file*
-  (merge-pathnames *data-repository*
-                   "DH_Physician_Extract.csv"))
 (defparameter *provider-file*
   (merge-pathnames *data-repository* "DH_Physician_Extract.csv"))
 (defparameter *patient-file*
@@ -65,21 +62,21 @@
 ;;; Provider table instance
 (definstance make-provider 'provider (create-index-hash *provider-file*)
   :name (entry 'prov_name row)
-  :id (parse-integer (entry 'prov_id row))
-  :line (parse-integer (entry 'line row))
-  :speciality (entry 'prov_specialty row))
+  :id (handler-parse-integer (entry 'prov_id row))
+  :line (handler-parse-integer (entry 'line row))
+  :specialty (entry 'prov_specialty row))
 
 ;;; Patient table instance
 (definstance make-patient 'patient (create-index-hash *patient-file*)
-  :mrn (parse-integer (entry 'pat_mrn_id row))
+  :mrn (handler-parse-integer (entry 'pat_mrn_id row))
   :dob (entry 'pat_dob row)
   :sex (entry 'pat_sex row))
 
 ;;; Result table instance
 (definstance make-result 'result (create-index-hash *result-file*)
   :specimen-number (entry 'specimen_number row)
-  :ordered-datetime (entry 'ordered_datetime row)
-  :verified-datetime (entry 'verified_datetime row)
+  :ordered-datetime (handler-parse-timestring (entry 'ordered_datetime row))
+  :verified-datetime (handler-parse-timestring (entry 'verified_datetime row))
   :resulting-section-name (entry 'resulting_section_name row)
   :resulting-section-id (entry 'resulting_section_id row)
   :method-name (entry 'method_name row)
@@ -93,11 +90,11 @@
   :delta-yn (entry 'delta_yn row)
   :result (entry 'result row)
   :component-units (entry 'component_units row)
-  :component-normal-low (entry 'component_normal_lo row)
-  :component-normal-high (entry 'component_normal_hi row)
+  :component-normal-low (entry 'component_nrml_lo row)
+  :component-normal-high (entry 'component_nrml_hi row)
   :component-comment (entry 'component_cmt row)
   :test-internal-comment (entry 'tst_int_comm_string row)
-  :test-external-comment (entry 'test_ext_comm_string row)
+  :test-external-comment (entry 'tst_ext_comm_string row)
   :resulting-user (entry 'resulting_user row)
   :verified-user (entry 'verified_user row)
   :collected-to-verified (entry 'coll_to_ver row)
@@ -110,12 +107,11 @@
   :encounter-department-name (entry 'encounter_department_name row)
   :encounter-department-id (entry 'encounter_department_id row)
   :mrn (entry 'pat_mrn_id row)
-  :age (entry 'age row)
+  :age (handler-parse-number (entry 'age row))
   :visit-type (entry 'visit_type row)
   :result-status (entry 'result_status row)
   :authorizing-provider-name (entry 'authorizing_prov_name row)
   :authorizing-provider-id (entry 'authorizing_prov_id row))
-
 
 ;;; Sample table instance
 (definstance make-sample 'sample (create-index-hash *sample-file*)
@@ -125,14 +121,11 @@
   :ordered-procedure (entry 'ordered_procedure row)
   :encounter (entry 'encounter row)
   :mrn (entry 'mrn row)
-  :non-patient-name (entry 'non_patient_name row)
-  :original-ordered-datetime (entry 'original_order_datetime row)
-  :collection-datetime (entry 'collection_datetime row)
-  :received-datetime (entry 'received_datetime row)
+  :non-patient-name (entry 'non-patient_name row)
+  :original-ordered-datetime (handler-parse-timestring (entry 'orig_order_datetime row))
+  :collection-datetime (handler-parse-timestring (entry 'collection_datetime row))
+  :received-datetime (handler-parse-timestring (entry 'received_datetime row))
   :priority (entry 'priority row)
   :specimen-drawn-by  (entry 'specimen_drawn_by row)
   :specimen-type  (entry 'specimen_type row)
-  :encounter-type  (entry 'encounter_type row)
-
-
-  )
+  :encounter-type  (entry 'encounter_type row))

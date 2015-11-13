@@ -16,15 +16,16 @@
   ((id :db-kind :key :db-constraints :not-null :initarg :id
        :type integer :accessor name)
    (name :initarg :name :type string :accessor name)
-   (line :initarg :line :type integer :accessor line)
+   (line :db-kind :key :db-constraints :not-null :initarg :line
+         :type integer :accessor line)
    ;; use location as a surrogate for specialty
    (specialty :initarg :specialty :type string :accessor specialty))
   (:base-table |provider|))
 
 ;;; Result super-class
 (clsql:def-view-class result ()
-  ((specimen-number :initarg :specimen-number :type string
-                    :accessor specimen-number)
+  ((specimen-number :db-kind :key :db-constraints :not-null :initarg :specimen-number
+                    :type string :accessor specimen-number)
    (ordered-datetime :initarg :ordered-datetime :type clsql:wall-time
                      :accessor ordered-datetime)
    (verified-datetime :initarg :verified-datetime :type clsql:wall-time
@@ -43,8 +44,8 @@
    (test-id :initarg :test-id :type string :accessor test-id)
    (component-name :initarg :component-name :type string
                    :accessor component-name)
-   (component-id :initarg :component-id :type string
-                 :accessor component-id)
+   (component-id :db-kind :key :db-constraints :not-null :initarg :component-id
+                 :type string :accessor component-id)
    (delta-yn :initarg :delta-yn :type string :accessor delta-yn)
    (result :initarg :result :type string :accessor result)
    (component-units :initarg :component-units :type string

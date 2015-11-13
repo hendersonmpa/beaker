@@ -2,7 +2,6 @@
 ;;; Utilities for creating instances from csv rows
 
 (in-package #:beaker)
-
 ;;; Build a hashtable with keys: column names and entries: column index.
 (defun create-index-hash (file)
   "Use the first row in the csv as the column-names.
@@ -11,11 +10,11 @@
            (cl-csv:read-csv-row file
                                 :separator #\|
                                 :unquoted-empty-string-is-nil t))
-         (replace-spaces (str) (cl-ppcre:regex-replace-all "\\s+" str "-")))
+         (clean-up (str) (string-upcase (cl-ppcre:regex-replace-all "\\s+" str "-"))))
     (let* ((column-names (get-column-names file))
            (clean-column-names (mapcar #'intern
-                                       (mapcar #'replace-spaces column-names)))
-           (ht (make-hash-table)) ; :test #'equal if not interned
+                                       (mapcar #'clean-up column-names)))
+           (ht (make-hash-table) ) ; :test #'equal if not interned
           (index 0))
       (dolist (key clean-column-names ht)
         (setf (gethash key ht) index)
@@ -24,16 +23,11 @@
 (defun print-hash (hashtable)
   (maphash #'(lambda (k v) (format t "key ~S, value ~A~%" k v)) hashtable))
 
-(defparameter *column-name-hash* (create-index-hash *test-file*)
-  "A hashtable with column names as keys and the index as values")
-
 (defun list-to-array (list)
   (make-array (length list)
               :initial-contents list))
 
-
-;;; Utilities for parsing
-
+;;; Parsing functions
 (defun make-datetime (datetime-list)
   "Convert ?m-?d-YYYY and ?h:?m:ss to ISO date-time format YYYY-MM-DD HH:MM:SS.SSS."
   (flet ((iso-date (date)
@@ -68,3 +62,17 @@
                  ((equalp units "months")
                   (/ number 12))
                  (t 0)))))
+
+(defun handler-parse-integer (s)
+  (handler-case (parse-integer s :junk-allowed t)
+    (parse-error () 0)
+    (type-error () 0)))
+
+(defun handler-parse-number (s)
+  (handler-case (parse-number:parse-number s)
+    (parse-error () nil)
+    (type-error () nil)))
+
+(defun handler-parse-timestring (s)
+  (handler-case (clsql-sys:parse-timestring s :junk-allowed t)
+    (sb-kernel:case-failure () nil)))

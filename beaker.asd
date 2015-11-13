@@ -8,6 +8,7 @@
   :depends-on (#:cl-csv
                #:clsql
                #:clsql-mysql
+               #:parse-number
                #:cl-ppcre
                #:cl-fad) ;; TODO: change to UIOP
   :components ((:file "package")

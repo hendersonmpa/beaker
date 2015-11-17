@@ -3,6 +3,8 @@
 
 (in-package :beaker)
 
+;;(setf lparallel:*kernel* (lparallel:make-kernel 4))
+
 ;; Create tables from our view classes
 ;; Only the first time !!!!!
 (defun create-schema ()
@@ -27,11 +29,11 @@
   (flet ((list-builder (row)
            (funcall instance-maker (list-to-array row))))
     (cl-csv:read-csv file
-                     :map-fn #'list-builder
+                     :map-fn #'list-builder ;; TODO: Make instance and upload
                      :skip-first-p t
                      :separator #\|
+                     :quote nil ;; there are quotes in comment strings
                      :unquoted-empty-string-is-nil t)))
-
 
 (defun update-table (file instance-maker
                      &optional (db-connection '("localhost" "lab" "root" "smjh13oo")))
@@ -43,15 +45,6 @@
           (clsql:with-database (db db-connection :database-type :mysql)
             (clsql:update-records-from-instance object :database db))
         (clsql-sys:sql-database-data-error () nil)))))
-
-(defun test-update ()
-  (let ((file-path (merge-pathnames *data-repository* "beaker.sqlite")))
-    (if (probe-file file-path) ;; only useful for sqlite
-        (delete-file file-path)
-        (print "Database doesn't exist"))
-    (create-schema)
-    (update-database)))
-
 
 (defun update-database ()
   (update-table *patient-file* #'make-patient)
@@ -73,3 +66,8 @@
 ;;   (clsql:list-tables :owner :all :database db))
 ;; (clsql:create-database '("localhost" "lab" "root" "smjh13oo") :database-type :mysql)
 ;; (clsql:probe-database '("localhost" "lab" "root" "smjh13oo") :database-type :mysql)
+
+;; (let ((db-connection '("localhost" "lab" "root" "smjh13oo")))
+;;   (clsql:with-database (db db-connection :database-type :mysql)
+;;     (clsql:select 'result :where [ = [slot-value 'result 'resulting-section-name]
+;;                   "BIOCHEMISTRY"] :database db)))

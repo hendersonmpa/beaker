@@ -1,0 +1,24 @@
+#+TITLE: Beaker
+#+OPTIONS: html-link-use-abs-url:nil html-postamble:auto
+#+OPTIONS: html-preamble:t html-scripts:t html-style:t
+#+OPTIONS: html5-fancy:nil tex:t
+#+CREATOR: <a href="http://www.gnu.org/software/emacs/">Emacs</a> 24.5.1 (<a href="http://orgmode.org">Org</a> mode 8.2.10)
+#+HTML_CONTAINER: div
+#+HTML_DOCTYPE: xhtml-strict
+#+HTML_HEAD:
+#+HTML_HEAD_EXTRA:
+#+HTML_LINK_HOME:
+#+HTML_LINK_UP:
+#+HTML_MATHJAX:
+#+INFOJS_OPT:
+#+LATEX_HEADER:
+
+* Tasks
+** TODO Ask for files to be placed on Hex
+** TODO explore lparallel for writing to the database
+** TODO cron job
+** TODO ut.lisp
+* Validation
+** Accession vs Specimen number
+** Different number of unique "accession" number in the results vs sample
+- It looks like sample does not have V numbers

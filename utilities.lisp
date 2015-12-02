@@ -2,6 +2,7 @@
 ;;; Utilities for creating instances from csv rows
 
 (in-package #:beaker)
+
 ;;; Build a hashtable with keys: column names and entries: column index.
 (defun create-index-hash (file)
   "Use the first row in the csv as the column-names.

@@ -10,9 +10,12 @@
                #:clsql-mysql
                #:parse-number
                #:cl-ppcre
+               #:split-sequence
+               #:lparallel
                #:cl-fad) ;; TODO: change to UIOP
   :components ((:file "package")
                (:file "view-classes")
                (:file "utilities")
                (:file "instances")
-               (:file "db")))
+               (:file "db")
+               (:file "bulk")))

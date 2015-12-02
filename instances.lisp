@@ -4,14 +4,22 @@
 (in-package #:beaker)
 
 (defparameter *data-repository* "~/CHEO/LIS/data_mart/")
+;;(defparameter *data-repository* "~/CHEO/LIS/data_mart/archive/")
 (defparameter *provider-file*
-  (merge-pathnames *data-repository* "DH_Physician_Extract.csv"))
+  (merge-pathnames *data-repository* "DH_Physician_Extract_Yearly.csv"))
+(defparameter *provider-ht* (create-index-hash *provider-file*))
+
 (defparameter *patient-file*
-  (merge-pathnames *data-repository* "DH_Patient_Extract.csv"))
+  (merge-pathnames *data-repository* "DH_Patient_Extract_Yearly.csv"))
+(defparameter *patient-ht* (create-index-hash *patient-file*))
+
 (defparameter *result-file*
-  (merge-pathnames *data-repository* "DH_Results_Extract.csv"))
+  (merge-pathnames *data-repository* "DH_Results_Extract_Yearly1.csv"))
+(defparameter *result-ht* (create-index-hash *result-file*))
+
 (defparameter *sample-file*
-  (merge-pathnames *data-repository* "DH_Samples_Extract.csv"))
+  (merge-pathnames *data-repository* "DH_Samples_Extract_Yearly.csv"))
+(defparameter *sample-ht* (create-index-hash *sample-file*))
 
 ;;; Read in the csv files
 (defun create-row-vector (file)
@@ -24,10 +32,6 @@
                    :skip-first-p t
                    :separator #\|
                    :unquoted-empty-string-is-nil t))
-
-(defun test (iterations function file)
-  (time (dotimes (i iterations)
-          (funcall function file))))
 
 ;;; Provider instance closure
 ;; (let ((ht (create-index-hash *provider-file*)))
@@ -54,27 +58,27 @@
   (let ((gen-row (gensym "ROW"))
         (gen-key (gensym "KEY")))
     `(defun ,name (row)
-       (flet ((entry (,gen-key ,gen-row)  ;ht closure
-                (svref ,gen-row (gethash ,gen-key ,ht))))
+       (flet ((entry (,gen-key ,gen-row)
+                (elt ,gen-row (gethash ,gen-key ,ht))))
          (make-instance ,class
                         ,@body)))))
 
 ;;; Provider table instance
-(definstance make-provider 'provider (create-index-hash *provider-file*)
+(definstance make-provider 'provider *provider-ht*
   :name (entry 'prov_name row)
   :id (handler-parse-integer (entry 'prov_id row))
   :line (handler-parse-integer (entry 'line row))
   :specialty (entry 'prov_specialty row))
 
 ;;; Patient table instance
-(definstance make-patient 'patient (create-index-hash *patient-file*)
+(definstance make-patient 'patient *patient-ht*
   :mrn (handler-parse-integer (entry 'pat_mrn_id row))
   :dob (entry 'pat_dob row)
   :sex (entry 'pat_sex row))
 
 ;;; Result table instance
-(definstance make-result 'result (create-index-hash *result-file*)
-  :specimen-number (entry 'specimen_number row)
+(definstance make-result 'result *result-ht*
+  :accession (entry 'accession row)
   :ordered-datetime (handler-parse-timestring (entry 'ordered_datetime row))
   :verified-datetime (handler-parse-timestring (entry 'verified_datetime row))
   :resulting-section-name (entry 'resulting_section_name row)
@@ -114,7 +118,7 @@
   :authorizing-provider-id (entry 'authorizing_prov_id row))
 
 ;;; Sample table instance
-(definstance make-sample 'sample (create-index-hash *sample-file*)
+(definstance make-sample 'sample *sample-ht*
   :accession (entry 'accession row)
   :location (entry 'location row)
   :client (entry 'client row)

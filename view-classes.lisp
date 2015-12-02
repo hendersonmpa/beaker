@@ -24,8 +24,8 @@
 
 ;;; Result super-class
 (clsql:def-view-class result ()
-  ((specimen-number :db-kind :key :db-constraints :not-null :initarg :specimen-number
-                    :type string :accessor specimen-number)
+  ((accession :db-kind :key :db-constraints :not-null :initarg :accession
+                    :type string :accessor accession)
    (ordered-datetime :initarg :ordered-datetime :type clsql:wall-time
                      :accessor ordered-datetime)
    (verified-datetime :initarg :verified-datetime :type clsql:wall-time

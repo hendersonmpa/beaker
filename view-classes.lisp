@@ -110,8 +110,8 @@
                             :type clsql:wall-time :accessor ordered-procedure)
    (collection-datetime :initarg :collection-datetime :type clsql:wall-time
                         :accessor collection-datetime)
-   (received_datetime :initarg :received_datetime :type clsql:wall-time
-                      :accessor received_datetime)
+   (received-datetime :initarg :received-datetime :type clsql:wall-time
+                      :accessor received-datetime)
    (priority :initarg :priority :type string :accessor priority)
    (specimen-drawn-by :initarg :specimen-drawn-by :type string
                       :accessor specimen-drawn-by)

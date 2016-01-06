@@ -60,7 +60,3 @@
 ;; lines terminated by '\n'
 ;; ignore 1 lines"))
 ;;       (clsql:query statement :database db))))
-
-(loop :for (a b c d) :on (uiop:directory-files "/home/mpah/CHEO/LIS/data_mart/result/")
-   :by #'cddddr
-   :do (format t "~@{~A~%~}" a b c d))

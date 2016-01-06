@@ -7,8 +7,8 @@
 
 ;; Create tables from our view classes
 ;; Only the first time !!!!!
-(defun create-schema ()
-  (let ((db-connection '("localhost" "lab" "root" "smjh13oo")))
+(defun create-schema (&optional (db-name "lab"))
+  (let ((db-connection (list "localhost" db-name "root" "smjh13oo")))
     (flet ((handler-probe ()
                (handler-case
                    (clsql:probe-database db-connection :database-type :mysql)
@@ -23,6 +23,10 @@
         (clsql:create-view-from-class 'result :database db)
         (clsql:create-view-from-class 'sample :database db)))))
 
+
+;; (clsql:with-database (db '("localhost" "lab" "root" "smjh13oo") :database-type :mysql)
+;;   (clsql:create-view-from-class 'sample :database db))
+
 (defun csv-upload (instance-maker file &optional (db-connection '("localhost" "lab" "root" "smjh13oo")))
   "Process row into object and upload.
  Tried to make parallel, but I think that MySQL locks tables during insertion.
@@ -32,13 +36,22 @@
              (let ((object (funcall instance-maker row)))
                ;; TODO: I should handle-bind instead of ignoring errors
                ;;(clsql:update-records-from-instance object :database db)
-               (ignore-errors (clsql:update-records-from-instance object :database db)))))
+               (ignore-errors (clsql:update-records-from-instance object :database db))
+               )))
       (cl-csv:read-csv file
                        :row-fn #'object-loader
                        :skip-first-p t
                        :separator #\|
                        :quote nil ;; there are quotes in comment strings
                        :unquoted-empty-string-is-nil t))))
+
+
+;; (make-sample (car (cl-csv:read-csv *sample-file*
+;;                                    :skip-first-p t
+;;                                    :separator #\|
+;;                                    :quote nil ;; there are quotes in comment strings
+;;                                    :unquoted-empty-string-is-nil t)))
+
 
 (defun file-chunker (file)
   (let* ((complete (cl-csv:read-csv file

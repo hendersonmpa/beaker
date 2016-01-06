@@ -6,11 +6,11 @@
 (defparameter *data-repository* "~/CHEO/LIS/data_mart/")
 ;;(defparameter *data-repository* "~/CHEO/LIS/data_mart/archive/")
 (defparameter *provider-file*
-  (merge-pathnames *data-repository* "DH_Physician_Extract_Yearly.csv"))
+(merge-pathnames *data-repository* "DH_Physician_Extract_Yearly.csv"))
 (defparameter *provider-ht* (create-index-hash *provider-file*))
 
 (defparameter *patient-file*
-  (merge-pathnames *data-repository* "DH_Patient_Extract_Yearly.csv"))
+(merge-pathnames *data-repository* "DH_Patient_Extract_Yearly.csv"))
 (defparameter *patient-ht* (create-index-hash *patient-file*))
 
 (defparameter *result-file*
@@ -18,7 +18,7 @@
 (defparameter *result-ht* (create-index-hash *result-file*))
 
 (defparameter *sample-file*
-  (merge-pathnames *data-repository* "DH_Samples_Extract_Yearly.csv"))
+(merge-pathnames *data-repository* "DH_Samples_Extract_Yearly.csv"))
 (defparameter *sample-ht* (create-index-hash *sample-file*))
 
 ;;; Read in the csv files

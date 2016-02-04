@@ -2,24 +2,15 @@
 ;;; Functions and macros for creating instances from csv files.
 
 (in-package #:beaker)
-
-(defparameter *data-repository* "~/CHEO/LIS/data_mart/")
-;;(defparameter *data-repository* "~/CHEO/LIS/data_mart/archive/")
-(defparameter *provider-file*
-(merge-pathnames *data-repository* "DH_Physician_Extract_Yearly.csv"))
-(defparameter *provider-ht* (create-index-hash *provider-file*))
-
-(defparameter *patient-file*
-(merge-pathnames *data-repository* "DH_Patient_Extract_Yearly.csv"))
-(defparameter *patient-ht* (create-index-hash *patient-file*))
-
-(defparameter *result-file*
-  (merge-pathnames *data-repository* "DH_Results_Extract_Yearly1.csv"))
-(defparameter *result-ht* (create-index-hash *result-file*))
-
-(defparameter *sample-file*
-(merge-pathnames *data-repository* "DH_Samples_Extract_Yearly.csv"))
-(defparameter *sample-ht* (create-index-hash *sample-file*))
+(defparameter *data-archive* "~/CHEO/LIS/data_mart/archive/")
+(defparameter *provider-ht*
+  (create-index-hash (merge-pathnames "DH_Physician_Extract.csv" *data-archive*)))
+(defparameter *patient-ht*
+  (create-index-hash (merge-pathnames "DH_Patient_Extract.csv" *data-archive*)))
+(defparameter *result-ht*
+  (create-index-hash (merge-pathnames "DH_Results_Extract_Yearly1.csv" *data-archive*)))
+(defparameter *sample-ht*
+  (create-index-hash (merge-pathnames "DH_Samples_Extract.csv" *data-archive*)))
 
 ;;; Read in the csv files
 (defun create-row-vector (file)
@@ -32,26 +23,6 @@
                    :skip-first-p t
                    :separator #\|
                    :unquoted-empty-string-is-nil t))
-
-;;; Provider instance closure
-;; (let ((ht (create-index-hash *provider-file*)))
-;;   (defun make-provider (row)
-;;     (flet ((entry (key row)  ;ht closure
-;;              (svref row (gethash key ht))))
-;;       (make-instance 'provider
-;;                      :name (entry 'prov_name row)
-;;                      :id (parse-integer (entry 'prov_id row))
-;;                      :line (parse-integer (entry 'line row))
-;;                      :speciality (entry 'prov_specialty row)))))
-
-;; (let ((ht (create-index-hash *patient-file*)))
-;;   (defun make-patient (row)
-;;     (flet ((entry (key row)  ;ht closure
-;;              (svref row (gethash key ht))))
-;;       (make-instance 'patient
-;;                      :mrn (parse-integer (entry 'pat_mrn_id row))
-;;                      :dob (entry 'pat_dob row)
-;;                      :sex (entry 'pat_sex row)))))
 
 (defmacro definstance (name class ht &body body)
   "Return functions to make instances using the hash-table"

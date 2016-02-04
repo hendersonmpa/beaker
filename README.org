@@ -14,8 +14,10 @@
 #+LATEX_HEADER:
 
 * Tasks
-** TODO Ask for files to be placed on Hex
-** TODO explore lparallel for writing to the database
+** DONE Ask for files to be placed on Hex
+   CLOSED: [2016-02-04 Thu 10:08]
+** DONE explore lparallel for writing to the database
+   CLOSED: [2016-02-04 Thu 10:08]
 ** TODO cron job
 ** TODO ut.lisp
 * Validation

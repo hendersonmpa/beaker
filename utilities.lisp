@@ -32,12 +32,12 @@
 (defun make-datetime (datetime-list)
   "Convert ?m-?d-YYYY and ?h:?m:ss to ISO date-time format YYYY-MM-DD HH:MM:SS.SSS."
   (flet ((iso-date (date)
-           (ppcre:register-groups-bind
+           (cl-ppcre:register-groups-bind
                ((#'parse-integer month) (#'parse-integer day) (#'parse-integer year))
                ("(\\d{1,2})/(\\d{1,2})/(\\d{4})" date)
              (format nil "~4,'0d-~2,'0d-~2,'0d" year month day)))
          (iso-time (time)
-           (ppcre:register-groups-bind
+           (cl-ppcre:register-groups-bind
                ((#'parse-integer hours) (#'parse-integer minutes) (#'parse-integer seconds))
                ("(\\d{1,2}):(\\d{1,2}):(\\d{2})" time)
              (format nil "~2,'0d:~2,'0d:~2,'0d.000" hours minutes seconds))))
@@ -47,7 +47,7 @@
 
 (defun minutes-float (time-string)
   "convert HH:MM:SS to a minutes float"
-  (ppcre:register-groups-bind
+  (cl-ppcre:register-groups-bind
       ((#'parse-integer hours) (#'parse-integer minutes) (#'parse-integer seconds))
       ("(\\d+):(\\d{2}):(\\d{2})" time-string)
     (float (+ (* hours 60)
@@ -56,7 +56,7 @@
 
 (defun age-string-num (age-string)
   "TODO Convert an age string to a years float"
-  (ppcre:register-groups-bind
+  (cl-ppcre:register-groups-bind
       ((#'parse-integer number) units)
       ("(\\d{1,3}) (\\w{5,6})" age-string)
     (float (cond ((equalp units "years") number)
@@ -77,3 +77,30 @@
 (defun handler-parse-timestring (s)
   (handler-case (clsql-sys:parse-timestring s :junk-allowed t)
     (sb-kernel:case-failure () nil)))
+
+(defun remove-lines (filename start num)
+  "http://www.rosettacode.org/wiki/Remove_lines_from_a_file#Common_Lisp"
+  (let ((tmp-filename  (concatenate 'string filename "_tmp"))
+	(lines-omitted 0))
+    ;; Open a temp file to write the result to
+    (with-open-file (out tmp-filename
+			 :direction :output
+			 :if-exists :supersede
+			 :if-does-not-exist :create)
+      ;; Open the original file for reading
+      (with-open-file (in filename)
+	(loop
+	   for line = (read-line in nil 'eof)
+	   for i from 0
+	   until (eql line 'eof)
+	   ;; Write the line to temp file if it is not in the omitted range
+	   do (if (or (< i start)
+		      (>= i (+ start num)))
+                  (write-line line out)
+                  (setf lines-omitted (1+ lines-omitted))))))
+    ;; Swap in the temp file for the original
+    (delete-file filename)
+    (rename-file tmp-filename filename)
+    ;; Warn if line removal went past the end of the file
+    (when (< lines-omitted num)
+      (warn "End of file reached with only ~d lines removed." lines-omitted))))

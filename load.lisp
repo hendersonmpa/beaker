@@ -1,14 +1,13 @@
-;;; bulk.lisp
-;;; Bulk upload from csv files.
+;;; load.lisp
+;;; upload csv file to the database.
 
 (in-package #:beaker)
+
+(setf lparallel:*kernel* (lparallel:make-kernel 8))
+
 (defparameter *absolute-data-repository* "/home/mpah/CHEO/LIS/data_mart/")
-
-
-;;; TODO: DON'T FORGET TO CHANGE BACK
+;;; TODO: DON'T FORGET TO CHANGE BACK TO LAB
 (defparameter *db-connection* '("localhost" "test" "root" "smjh13oo"))
-;;(defparameter *data-repository* "~/CHEO/LIS/data_mart/")
-
 
 (defun split-file (input-file-string  output-dir-string)
   "create dir, split files"
@@ -59,8 +58,7 @@
                         (when d (lparallel:receive-result channel)))))))
     (uiop:collect-sub*directories dir #'collectp #'recursep #'collector)))
 
-
-(defun file-upload (file-name data-type
+(defun load-file (file-name data-type
                     &optional (db-connection *db-connection*)
                        (data-repository *absolute-data-repository*))
   ;; (split-file "DH_Results_Extract_Yearly1.csv" "results/")
@@ -71,7 +69,8 @@
                  (ensure-directories-exist output-dir-path)
                  (split-file (namestring data-file-path) (namestring output-dir-path))
                  (remove-lines (namestring (merge-pathnames "aa" output-dir-path)) 0 1)
-                 (load-split-files instance-maker output-dir-path))))
+                 (load-split-files instance-maker output-dir-path db-connection)
+                 (uiop:delete-directory-tree output-dir-path :validate t))))
       ;; remove split-dir and contents
       (ccase data-type
         ((patient) (process-file "patient/" #'make-patient))
@@ -79,6 +78,14 @@
         ((sample) (process-file "sample/" #'make-sample))
         ((provider) (process-file "provider/" #'make-provider))))))
 
-
-"DH_Results_Extract_2016-02-01-06-40-48.csv"
-"DH_Results_Extract_2016-02-04-06-40-39.csv"
+(defun load-dir (dir-name)
+  (let ((file-list (uiop:directory-files dir-name)))
+    (dolist (file-name file-list)
+      (cond ((cl-ppcre:scan "DH_Results_Extract.+" (namestring file-name))
+             (print file-name))
+            ((cl-ppcre:scan "DH_Patient_Extract.+" (namestring file-name))
+             (print file-name))
+            ((cl-ppcre:scan "DH_Physician_Extract.+" (namestring file-name))
+             (print file-name))
+            ((cl-ppcre:scan "DH_Samples_Extract.+" (namestring file-name))
+             (print file-name))))))

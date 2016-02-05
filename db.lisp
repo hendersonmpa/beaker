@@ -3,7 +3,6 @@
 
 (in-package :beaker)
 (require :sb-sprof)
-(setf lparallel:*kernel* (lparallel:make-kernel 8))
 
 ;; Create tables from our view classes
 ;; Only the first time !!!!!

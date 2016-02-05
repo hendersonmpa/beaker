@@ -14,7 +14,7 @@
   "create dir, split files"
   ;; (split-file "DH_Results_Extract_Yearly1.csv" "results/")
   (uiop:run-program
-   (list "/usr/bin/split" "-l 100000" input-file-string output-dir-string)
+   (list "/usr/bin/split" "-l 10000" input-file-string output-dir-string)
    :output t))
 
 (defun load-split-files (instance-maker dir
@@ -60,22 +60,25 @@
     (uiop:collect-sub*directories dir #'collectp #'recursep #'collector)))
 
 
-(defun bulk-upload (file-name data-type
+(defun file-upload (file-name data-type
                     &optional (db-connection *db-connection*)
                        (data-repository *absolute-data-repository*))
   ;; (split-file "DH_Results_Extract_Yearly1.csv" "results/")
   ;; (load-split-files  #'make-sample (merge-pathnames "sample/" *data-repository*))
   (let ((data-file-path (merge-pathnames data-repository file-name)))
-    (labels ((process-file (dir-string ht instance-maker)
+    (labels ((process-file (dir-string instance-maker)
                (let ((output-dir-path (merge-pathnames dir-string data-repository)))
                  (ensure-directories-exist output-dir-path)
                  (split-file (namestring data-file-path) (namestring output-dir-path))
                  (remove-lines (namestring (merge-pathnames "aa" output-dir-path)) 0 1)
                  (load-split-files instance-maker output-dir-path))))
-      (case data-type
-        ((patient) (process-file "patient/" *patient-ht* #'make-patient))
-        ((result) (process-file "result/" *result-ht* #'make-result))
-        ((sample) (process-file "sample/" *sample-ht* #'make-sample))
-        ((provider) (process-file "provider/" *provider-ht* #'make-provider))))))
+      ;; remove split-dir and contents
+      (ccase data-type
+        ((patient) (process-file "patient/" #'make-patient))
+        ((result) (process-file "result/"  #'make-result))
+        ((sample) (process-file "sample/" #'make-sample))
+        ((provider) (process-file "provider/" #'make-provider))))))
 
+
+"DH_Results_Extract_2016-02-01-06-40-48.csv"
 "DH_Results_Extract_2016-02-04-06-40-39.csv"

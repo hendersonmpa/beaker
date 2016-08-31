@@ -11,6 +11,8 @@
   (create-index-hash (merge-pathnames "DH_Results_Extract_Yearly1.csv" *data-archive*)))
 (defparameter *sample-ht*
   (create-index-hash (merge-pathnames "DH_Samples_Extract.csv" *data-archive*)))
+(defparameter *price-ht*
+  (create-index-hash (merge-pathnames "price.psv" *data-archive*)))
 
 ;;; Read in the csv files
 (defun create-row-vector (file)
@@ -104,3 +106,9 @@
   :specimen-drawn-by  (entry 'specimen_drawn_by row)
   :specimen-type  (entry 'specimen_type row)
   :encounter-type  (entry 'encounter_type row))
+
+;;; Price table instance
+(definstance make-price 'price *price-ht*
+  :test-name (entry 'test_name row)
+  :test-id (entry 'test_id row)
+  :price (handler-parse-number (entry 'price row)))

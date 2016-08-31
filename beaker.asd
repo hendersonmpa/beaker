@@ -17,5 +17,5 @@
                (:file "view-classes")
                (:file "utilities")
                (:file "instances")
-               (:file "db")
-               (:file "bulk")))
+               (:file "schema")
+               (:file "load")))

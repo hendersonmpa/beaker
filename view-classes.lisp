@@ -31,7 +31,7 @@
    (verified-datetime :initarg :verified-datetime :type clsql:wall-time
                       :accessor verified-datetime)
    (resulting-section-name :initarg :resulting-section-name :type string
-                   :accessor resulting-section-name)
+                           :accessor resulting-section-name)
    (resulting-section-id :initarg :resulting-section-id :type string
                        :accessor resulting-section-id)
    (method-name :initarg :method-name :type string :accessor method-name)
@@ -120,3 +120,11 @@
    (encounter-type :initarg :encounter :type string
                    :accessor encounter-type))
   (:base-table |sample|))
+
+;;; Price class
+(clsql:def-view-class price ()
+  ((test-name :initarg :test-name :type string :accessor test-name)
+   (test-id :db-kind :key :db-constraints :not-null :initarg :test-id
+            :type string :accessor test-id)
+   (price :initarg :price :type float :accessor price))
+  (:base-table |price|))

@@ -24,3 +24,6 @@
 ** Accession vs Specimen number
 ** Different number of unique "accession" number in the results vs sample
 - It looks like sample does not have V numbers
+
+* Field request
+-
